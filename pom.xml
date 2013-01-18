@@ -9,6 +9,7 @@
     <version>1.0</version>
     <packaging>pom</packaging>
     <name>Stormcloud IDE - Project</name>
+    <url>http://stormcloud-ide.github.com/project</url>
 
     <description>
         TODO
