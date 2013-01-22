@@ -33,17 +33,20 @@
                 <h3>CLI Installer - FSM (Frikin' Short Manual)</h3>
 
                 <p>
-                    To fire up the installer you type
+                    Grab yourself a copy of the installer <a href="../../installer/installer.html">here</a> and come back or
+                    <a href="https://github.com/stormcloud-ide/installer">Fork</a> and build from source. Also come back.
                 </p>
-
+                <p>
+                    Either and anyway, you will end up with a jar file which you fire up like this
+                </p>
                 <pre style="width: 620px;">
 <code>
-martijn:target martijn$ java -jar stormcloud-installer-cli.jar 
+martijn$ java -jar stormcloud-installer-cli.jar 
 </code>
                 </pre>
 
                 <p>
-                    
+                    A startup banner shows up which tells you a little and asks you some
                 </p>
 
                 <pre style="width: 620px;">
@@ -73,6 +76,50 @@ Do you want to run the Stormcloud IDE Installer? [n]:
 </code>
                 </pre>
 
+                <p>
+                    When answering with 'y' the installer will enter into the installer prompt, otherwise it's going to whish you a nice day.
+                </p>
+
+                <p>
+                    I'm assuming you said 'y', you are now on the installer prompt.
+                </p>
+                <pre style="width: 620px;">
+<code>
+    
+Do you want to run the Stormcloud IDE Installer? [n] y
+Stormcloud IDE $ 
+</code>
+                </pre>
+
+                <p>
+                    Type help at any time to know what options you have.
+                </p>
+
+                <pre style="width: 620px;">
+<code>
+Stormcloud IDE $ help
+
+Use one of these commands: 
+
+help      : Print this list of commands
+sanity    : Check if the machine is installation sane
+env       : Tell you the bear necessities i already know
+user      : Install the User Home components
+server    : Install the Server components
+all       : I will do it all
+bye       : I will leave you be
+
+Stormcloud IDE $ 
+</code>
+                </pre>
+
+                <p>
+                    So you can run a fresh install, do a 'recover' of particular parts, keep checking till things are sane or let it all be told and done.
+                </p>
+                
+                <p>
+                    ENJOY!
+                </p>
 
             </section>
 
