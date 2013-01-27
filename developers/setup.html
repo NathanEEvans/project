@@ -1,0 +1,346 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="chrome=1">
+        <title>Stormcloud IDE</title>
+        <link rel="stylesheet" href="../stylesheets/styles.css">
+        <link rel="stylesheet" href="../stylesheets/pygment_trac.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <!--[if lt IE 9]>
+        <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <div class="wrapper">
+            <header>
+                <a href="../index.html">
+                    <img alt="Stormcloud IDE" src="../images/logo.png">  
+                </a>
+                <p>
+                    Coding in the Cloud
+                </p>
+                <p class="view"><a href="https://github.com/stormcloud-ide">View Stormcloud IDE on GitHub <small>stormcloud-ide</small></a></p>
+                <ul>
+                    <li><a href="../installer/installer.html">Grab an <strong>Installer</strong></a></li>
+                    <li><a href="../showcase/showcase.html">Show <strong>Case</strong></a></li>
+                    <li><a href="../docs/docs.html">Manuals <strong>&amp; Docs</strong></a></li>
+                </ul>
+
+            </header>
+            <section>
+
+                <h3>Developer setup manual</h3>
+
+                <p>
+                    This is an attempt to guide you (a developer) over the bumps of setting up your environment 
+                    so you can run the Stormcloud IDE and join in the development. 
+                    As it is a work in progress i ask you to bear with me and point out errors and/or 
+                    shortcomings so at some point it will be an accurate and complete document. 
+                </p>
+                <p>
+                    First of start with forking and cloning 
+                    the <a href="https://github.com/stormcloud-ide/project">Project</a>, 
+                    <a href="https://github.com/stormcloud-ide/gui">GUI</a> and 
+                    <a href="https://github.com/stormcloud-ide/api">API</a>, repositories
+                    and give them a star of course! ;)
+                </p>
+
+                <p>
+                    The project repository contains the super pom, you'll need to build this one first otherwise 
+                    the api project will not build.
+                </p>
+
+                <p>
+                    The api project is a maven project, build it, you'll need the stormcloud.war later on. 
+                </p>
+
+                <p>
+                    The gui project is a pure html/javascript project. It's created with the Dojo toolkit and 
+                    the stormcloud implementation bootstraps from the js/stormcloud/stormcloud.js. I have tried to create a 
+                    modular structure which will allow us to continue building modular with reuse etc in mind. 
+                    anyway, check it out, all remarks, ideas, comments etc are welcome as i'm not the almighty all-knower ;)
+                </p>
+
+                <p>
+                    The Stormcloud IDE exists of three parts (check the architecture pic way at the 
+                    bottom here http://stormcloud-ide.github.com/project). These are GUI, API and User Home.
+                </p>
+
+                <h3>GUI</h3>
+
+                <p>
+                    The IDE itself is served trough apache, so you need to have an apache installation and a site-enabled 
+                    which serves the contents of the gui repository. The project as cloned is ready to exactly be copy 
+                    pasted into a website root. What i did is create a symlink from the dir where i cloned the sources 
+                    to the dir apache knows has to serve. That way you can edit/view and commit directly without hassle/moving 
+                    things around, of course you can set it up anyway works best for you.
+                </p>
+
+                <p>
+                    Make sure you have mod_proxy_http loaded as well (this will probably change to the ajp connector for 
+                    load balancing later on but is not important now).
+                </p>
+
+                <p>
+                    When that is done the GUI should be correctly served from http://your-machine/
+                    I have placed it in the apache root, you can also use a different folder if you have other sites running 
+                    locally (for example http://localhost/[your-site-folder]/), that's all up to you, how you like to work.
+                </p>
+
+                <h3>API (Rest Service)</h3>
+
+                <p>
+                    Now you only have the gui, this is going to look empty when you run it because it cannot connect to the 
+                    API yet. So that's the second part. The Rest api is served from a tomcat instance, not the same one 
+                    as the user home (next section) is going to use! 
+                </p>
+
+                <p>
+                    So install tomcat (i use tomcat 7).
+                </p>
+
+                <p>
+                    The API spring configuration is using a properties file to find the MySQL database it needs to use 
+                    (which you will be creating in the next part of this manual). I have placed a properties file in 
+                    api/core/src/main/properties/stormcloud.properties. This file needs to be placed in [your-tomcat-home]/lib/properties 
+                    (create the properties dir). Change the username and password into anything you see fit as long as it can 
+                    access the database schema you are about to create.
+                </p>
+
+                <p>
+                    As said, the IDE also uses a MySQL database for user settings etc, so make sure you have mysql installed.
+                    I have added a MySQL dump of the stormcloud schema in api/core/src/main/database/stormcloud.dump, run it 
+                    on your MySQL instance to create the database and make sure the user in the properties file is the one that 
+                    can access this schema.
+                </p>
+
+                <h3>User Home (Filesystem)</h3>
+
+                <p>
+                    We are now going to create the User Home where the user 'private parts' (ehm, well, you know what i mean ;) ) will be living. 
+                    Create the following folder structure in a directory of your choice (i have it in /filesystem/martijn) but you 
+                    can really place it anywhere. So create these folders in there:
+                </p>
+
+                <pre>
+.log
+.m2
+.trash
+java
+projects
+tomcat
+                </pre>
+
+                <p>
+                    Make sure these folder are writable to the user which runs tomcat, place them in the same group or something like that. 
+                    I just run tomcat as the same user as the folder owner, but that can be done much better from a linux admin perspective ;) 
+                    Not important at the moment...
+                </p>
+
+                <p>
+                    You might want to place some example maven projects in the [user-home]/projects folder so you have actually a project to look at 
+                    later on.
+                </p>
+
+                <p>
+                    Also place a tomcat installation in the [user-home]/tomcat dir and create a symlink to it called 'latest'. This is for easy 
+                    tomcat upgrading later on, or maybe even have a user choose which tomcat version he wants to run. 
+                    So you would end up with [user-home]/tomcat/latest being the tomcat root or tomcat home if you like. 
+                    You can also just make it a folder called 'latest' does not really matter for now. What does matter is that you 
+                    change the port of this tomcat installation to be different from the tomcat you are already running. 
+                    I changed this in the [tomcat-home]/conf/server.xml:
+                </p>
+
+                <pre>
+&lt;Server port="8005" shutdown="SHUTDOWN"&gt;
+
+into:
+                    
+&lt;Server port="8105" shutdown="SHUTDOWN"&gt;
+
+and
+
+&lt;Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="8443" /&gt;
+
+into:
+
+&lt;Connector port="8180" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="8443" /&gt;
+
+                </pre>
+
+                <p>
+                    The java folder stays empty for now, i'm still working around a few issues before the private VM can be run, 
+                    so all is going to run on one JVM for now.
+                </p>
+
+                <p>
+                    Once you have the folder structure setup as described you need to change some database values to resemble this:
+                </p>
+
+                <p>
+                    In the user table change the user_name, password into anything you want to use, this is the user against which 
+                    the API calls need to be authenticated. The email address, well, it doesn't do anything yet so, fill in 
+                    whatever you want.
+                </p>
+
+                <p>
+                    In the same table change the home_folder, project_folder, m2_folder to the respective filsystem paths where you placed these folders.
+                </p>
+
+                <p>
+                    Now... if you brought it this far you are almost set to go BUT...
+                </p>
+
+                <p>
+                    We need to tie things together between Apache and Tomcat and configure some things in the gui. 
+                    In your apache configuration add these proxy rules:
+                </p>
+
+                <pre>
+ProxyRequests Off
+ProxyPreserveHost On
+
+&lt;Proxy *&gt;
+Order allow,deny
+Allow from all
+&lt;/Proxy&gt;
+
+# Stormcloud Rest API
+ProxyPass /stormcloud http://localhost:8080/stormcloud
+ProxyPassReverse /stormcloud http://localhost:8080/stormcloud
+
+# Stormcloud Chat (Comet)
+ProxyPass /cometd http://localhost:8080/cometd-demo-2.5.0/cometd
+ProxyPassReverse /cometd http://localhost:8080/cometd-demo-2.5.0/cometd
+                </pre>
+
+                <p>
+                    And now i see the second rule for cometd, yes that one needs to be deployed in tomcat as well... 
+                    for now i have added the cometd-demo-2.5.0.war in api/core/src/main/cometd which you can directly deploy 
+                    into tomcat.
+                    It's a demo war and basically a left over of the chat proof of concept i made so at some point a there 
+                    has to be an 'own' cometd implementation.
+                </p>
+
+                <p>
+                    Almost there, the gui needs to know a few things, this is mainly because it's a work in progress, anyway, here goes:
+                </p>
+
+                <p>
+                    In the gui/js/stormcloud/_base/context.js you will have to change the values as shown below into values that comply with 
+                    how you have your setup.
+                    I have added 127.0.0.1  stormcloud-ide.com in my /etc/hosts file. You can also just use localhost, whichever you prefer 
+                    as long as these values are according to what you type in the browser to reach the GUI (this is a cross-domain/origin thing).
+                </p>
+
+                <p>
+                    I also habe added 127.0.0.1 martijn.stormcloud-ide.com to the hosts file and pointed it in the context file to my 'private' 
+                    tomcat installation in the user home.
+                </p>
+
+                <pre>
+host     : 'stormcloud-ide.com',
+tomcatViewUrl : 'martijn.stormcloud-ide.com:8180',
+tomcatManagerUrl : 'martijn.stormcloud-ide.com/manager/text/',
+                </pre>
+
+                <p>
+                    Also change the value in the gui/js/stormcloud/_base/auth.js to read the user/pass you have in the database user table.
+                    mine reads:
+                </p>
+
+                <pre>
+return base64.encode('martijn:1');
+                </pre>
+
+                <p>
+                    that's what i have in the database user_name : martijn, password 1
+                </p>
+
+                <p>
+                    If all is well (i'm not sure if i missed anything, but probably did) you can now start the tomcat instance with the 
+                    API and cometd in it (let's call it the global tomcat) and when you serve the GUI now trough your browser it should show the 
+                    maven project(s) you placed in the [user-home]/projects folder.
+                </p>
+
+                <p>
+                    Pfew, i know it's a bit of bump but it's a one-time setup, once it works you can run and code!
+                </p>
+
+                <p>
+                    Let me know when you have questions etc. You can also reach me on skype: mteigeler
+                </p>
+
+                <p>
+                    Hope you get you head around it! Place any questions in the <a href="http://www.linkedin.com/groups/Stormcloud-IDE-4772256">Stormcloud IDE Group</a> so 
+                    we can keep it central for anyone to read and know! 
+                </p>
+
+            </section>
+
+            <footer>
+
+                <p>
+                    The Backbone:
+                </p>
+
+                <p>
+                    <a href="https://github.com/stormcloud-ide/gui">
+                        <img alt="Stormcloud IDE - Project" src="../images/gui-logo-trimmed.png">
+                    </a>
+                </p>
+
+                <p>
+                    <a href="https://github.com/stormcloud-ide/api">
+                        <img alt="Stormcloud IDE - Project" src="../images/api-logo-trimmed.png">
+                    </a>
+                </p>
+
+
+                <table>
+                    <tr>
+                        <td style="width: 30px;padding:0px;">
+                            <iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2Fpages%2FStormcloud-IDE%2F442619979140451&amp;send=false&amp;layout=standard&amp;width=50&amp;show_faces=false&amp;font=arial&amp;colorscheme=light&amp;action=like&amp;height=25"
+                                    scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:50px; height:25px;" allowTransparency="true"></iframe>
+                        </td>
+                        <td style="width: 30px; padding:0px;">
+                            <a href="http://www.linkedin.com/groups/Stormcloud-IDE-4772256" 
+                               style="text-decoration:none;">
+                                <img src="../images/linkedin.jpg" width="30" height="30" alt="View Stormcloud IDE on LinkedIn" border="0">
+                            </a>
+                        </td>
+                        <td style="padding-left: 1px;">
+                            <a href="https://twitter.com/stormcloud_ide" class="twitter-follow-button" data-show-count="false" data-size="large" data-show-screen-name="false">Follow</a>
+                            <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+                        </td>
+
+                    </tr>
+
+                </table>
+
+
+                <p>
+                    This project is maintained by <a href="https://github.com/stormcloud-ide">stormcloud-ide</a>
+                    <br>
+                    <small>Copyright (C) 2012 - 2013 Stormcloud IDE</small>
+                </p>
+                <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+            </footer>
+        </div>
+        <script src="javascripts/scale.fix.js"></script>
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-37739619-6']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+
+        </script>
+    </body>
+</html>
