@@ -202,7 +202,7 @@ c3p0.acquireRetryAttempts       = 1
 
                 <p>
                     As you might have noticed by now, the API uses a MySQL database, so make sure you have mysql installed. Verify your installation by being able to
-                    login to the MySQL instance (either via command prompt or your favorite SQL IDE) before proceeding.
+                    login to the MySQL instance (either via command prompt or your favorite SQL tool).
                 </p>
 
                 <p>
@@ -242,6 +242,7 @@ stormcloud.db.min.poolsize  = 1
                 <p>
                     We are now going to create the User Home. 
                 </p>
+
                 <p>
                     Create the following folder structure in a directory of your choice (i have it in /filesystem/martijn) but you 
                     can really place it anywhere. So create these folders in there:
@@ -257,23 +258,30 @@ tomcat
                 </pre>
 
                 <p>
-                    Make sure these folder are writable to the user which runs tomcat, place them in the same group or something like that. 
-                    I just run tomcat as the same user as the folder owner, but that can be done much better from a linux admin perspective ;) 
-                    Not important at the moment...
+                    Also create the folder /var/log/stormcloud, this is where the API logging goes.
                 </p>
 
                 <p>
-                    You might want to place some example maven projects in the [user-home]/projects folder so you have actually a project to look at 
-                    later on.
+                    Make sure these folders are writable to the user which runs your Tomcat instance, place them in the same group or something like that. 
+                    I just run tomcat as the same user as the folder owner, but that can be done much better from a linux admin perspective ;) 
                 </p>
 
                 <p>
                     Also place a tomcat installation in the [user-home]/tomcat dir and create a symlink to it called 'latest'. This is for easy 
-                    tomcat upgrading later on, or maybe even have a user choose which tomcat version he wants to run. 
-                    So you would end up with [user-home]/tomcat/latest being the tomcat root or tomcat home if you like. 
-                    You can also just make it a folder called 'latest' does not really matter for now. What does matter is that you 
-                    change the port of this tomcat installation to be different from the tomcat you are already running. 
-                    I changed this in the [tomcat-home]/conf/server.xml:
+                    tomcat upgrading later on, or maybe even have a user choose which tomcat version he wants to run. Anyway, like this
+                </p>
+
+                <pre>
+drwxr-xr-x  13 martijn  admin  442 21 dec 10:05 apache-tomcat-7.0.34
+lrwxr-xr-x   1 martijn  admin   20 21 dec 10:08 latest -> apache-tomcat-7.0.34
+                </pre>
+
+                <p>
+                    So you would end up with [user-home]/tomcat/latest being the tomcat home.
+                </p>
+                <p>
+                    You will also need to change the port of this tomcat installation to be different from the tomcat you are already running behind port 8080. 
+                    Change this in the [tomcat-home]/conf/server.xml
                 </p>
 
                 <pre>
@@ -294,28 +302,39 @@ into:
                 </pre>
 
                 <p>
-                    The java folder stays empty for now, i'm still working around a few issues before the private VM can be run, 
+                    You can change this to any port you see fit as long as you remember what it is.
+                </p>
+
+                <p>
+                    The java folder stays empty for now, i'm still working on a few issues before the private VM can be run, 
                     so all is going to run on one JVM for now.
                 </p>
 
+
+                <h4>The last bits</h4>
+
                 <p>
-                    Once you have the folder structure setup as described you need to change some database values to resemble this:
+                    Time to build and deploy the Stormcloud API war file. Run a <code>mvn clean install</code> on the api project
+                    and you should end up with a stormcloud.war in the target dir. Deploy this into the Tomcat instance running behind port 8080.
                 </p>
 
+                <p>
+                    Check if the deployment is without errors in the tomcat logfile ([tomcat-home/logs/catalina.out])
+                </p>
 
                 <p>
-                    This database contains the realm tables for the API Basic authentication and some settings. We are going to change 
-                    a few 'default' values that were inserted when you created the database.
+                    A few settings in the database need to be edited to resemble your setup and change the API user credentials.    
                 </p>
 
                 <p>
                     In the user table change the user_name, password into anything you want to use, this is the user against which 
-                    the API calls need to be authenticated. The email address, well, it doesn't do anything yet so, fill in 
+                    the API calls need to be authenticated. The email address, well, it does not do anything yet so, fill in 
                     whatever you want.
-
-                    home_folder, project_folder, m2_folder to the respective filsystem paths where you placed these folders.
                 </p>
-
+                <p>
+                    The same table holds the home_folder, project_folder, m2_folder and you will have to change them to the respective 
+                    filesystem paths where you placed these User Home folders.
+                </p>
 
                 <p>
                     Now... if you brought it this far you are almost set to go BUT...
@@ -347,8 +366,7 @@ ProxyPassReverse /cometd http://localhost:8080/cometd-demo-2.5.0/cometd
                 <p>
                     And now i see the second rule for cometd, yes that one needs to be deployed in tomcat as well... 
                     for now i have added the cometd-demo-2.5.0.war in api/core/src/main/cometd which you can directly deploy 
-                    into tomcat.
-                    It's a demo war and basically a left over of the chat proof of concept i made so at some point a there 
+                    into tomcat. It's a demo war and basically a left over of the chat proof of concept i made so at some point there 
                     has to be an 'own' cometd implementation.
                 </p>
 
@@ -364,14 +382,14 @@ ProxyPassReverse /cometd http://localhost:8080/cometd-demo-2.5.0/cometd
                 </p>
 
                 <p>
-                    I also habe added 127.0.0.1 martijn.stormcloud-ide.com to the hosts file and pointed it in the context file to my 'private' 
+                    I also have added 127.0.0.1 martijn.stormcloud-ide.com to the hosts file and pointed it in the context file to my 'private' 
                     tomcat installation in the user home.
                 </p>
 
                 <pre>
-host     : 'stormcloud-ide.com',
-tomcatViewUrl : 'martijn.stormcloud-ide.com:8180',
-tomcatManagerUrl : 'martijn.stormcloud-ide.com/manager/text/',
+host                : 'stormcloud-ide.com',
+tomcatViewUrl       : 'martijn.stormcloud-ide.com:8180',
+tomcatManagerUrl    : 'martijn.stormcloud-ide.com/manager/text/',
                 </pre>
 
                 <p>
@@ -384,26 +402,25 @@ return base64.encode('martijn:1');
                 </pre>
 
                 <p>
-                    that's what i have in the database user_name : martijn, password 1
+                    that's what i have in the database user_name : martijn, password : 1
                 </p>
 
                 <p>
                     If all is well (i'm not sure if i missed anything, but probably did) you can now start the tomcat instance with the 
-                    API and cometd in it (let's call it the global tomcat) and when you serve the GUI now trough your browser it should show the 
-                    maven project(s) you placed in the [user-home]/projects folder.
+                    API and cometd in it (the one behind port 8080) and when you serve the GUI now it should show the contents of your
+                    User Home Tomcat installation under the services Tab.
+                </p>
+
+                <p>
+                    Try to create a new project and if all is well you will be able to browse it in the projects and files pane. 
                 </p>
 
                 <p>
                     Pfew, i know it's a bit of bump but it's a one-time setup, once it works you can run and code!
                 </p>
 
-                <p>
-                    Let me know when you have questions etc. You can also reach me on skype: mteigeler
-                </p>
-
-                <p>
-                    Hope you get you head around it! Place any questions in the <a href="http://www.linkedin.com/groups/Stormcloud-IDE-4772256">Stormcloud IDE Group</a> so 
-                    we can keep it central for anyone to read and know! 
+                Place any questions on the <a href="http://stormcloud-ide.44872.n6.nabble.com/">Mailing list</a> so 
+                we can keep it central for anyone to read and know! 
                 </p>
 
             </section>
