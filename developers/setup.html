@@ -123,8 +123,6 @@
                     pom in your maven repository.
                 </p>
 
-
-
                 <h4>Setting up the GUI</h4>
 
                 <p>
@@ -136,8 +134,8 @@
                     The Stormcloud IDE GUI is served trough apache, so you need to have an apache installation and a site-enabled 
                     which serves the contents of the gui repository you just cloned. The project as cloned is ready to exactly be copy 
                     pasted into a website root. What i do is create a symlink from the dir where i cloned the repository 
-                    to the dir apache knows has to serve. That way you can edit/view and commit directly without hassle/moving 
-                    things around, of course you can set it up anyway works best for you.
+                    to the dir apache knows has to serve. That way you can edit/view and commit directly without the hassle of moving 
+                    things around, of course you can set it up anyway it works best for you.
                 </p>
 
                 <p>
@@ -147,7 +145,7 @@
 
                 <p>
                     When that is done the GUI should be correctly served from http://your-machine/<br>
-                    I have placed it in the apache root, you can also use a different folder if you have other sites running 
+                    I have placed it in the apache doc root, you can also use a different folder if you have other sites running 
                     locally (for example http://localhost/[your-site-folder]/), that's all up to you, how you like to work.
                 </p>
 
@@ -155,10 +153,13 @@
                     At this point you should be able to see the GUI as shown below when accessing <a href="http://localhost">http://localhost</a> 
                     or whatever folder you placed the site in.
                 </p>
-                <img src="../images/empty-ide.png">
 
                 <p>
-                    This is without projects, files, services in the left side explorer panes as the GUI cannot reach the Rest API (yet). 
+                    <img src="../images/empty-ide.png">
+                </p>
+
+                <p>
+                    This is <strong>without</strong> projects, files or services visible in the left side explorer panes as the GUI cannot reach the Rest API (yet). 
                     The GUI components should all work though (menus, tabs..), meaning Dojo is correctly loaded.
                 </p>
 
@@ -168,32 +169,80 @@
                     Now for the next part. The Rest API is served from tomcat. (not the same one as the User Home is going to use!)
                 </p>
 
+
+                <h5>Tomcat</h5>
+
                 <p>
                     Make sure you have a correctly installed and working Tomcat (i use tomcat 7) which you can reach trough 
                     <a href="http://localhost:8080">http://localhost:8080</a> where the Tomcat welcome page should show up.
                 </p>
 
-                <img src="../images/tomcat-welcome.png">
+                <p>
+                    <img src="../images/tomcat-welcome.png">
+                </p>
+
 
                 <p>
-                    The API spring configuration is using a properties file to find the MySQL database it needs to use 
-                    (which you will be creating in the next part of this manual). I have placed a properties file in 
-                    api/core/src/main/properties/stormcloud.properties. This file needs to be placed in [your-tomcat-home]/lib/properties 
-                    (create the properties dir). Change the username and password into anything you see fit as long as it can 
-                    access the database schema you are about to create.
+                    You will have to copy a suitable MySQL driver (grab one <a href="http://dev.mysql.com/downloads/connector/j/">here</a>) into the [tomcat-home]/lib folder.
                 </p>
 
                 <p>
-                    As said, the IDE also uses a MySQL database for user settings etc, so make sure you have mysql installed.
-                    I have added a MySQL dump of the stormcloud schema in api/core/src/main/database/stormcloud.dump, run it 
-                    on your MySQL instance to create the database and make sure the user in the properties file is the one that 
-                    can access this schema.
+                    We use c3p0 for connection pooling. Grab yourself a copy <a href="https://sourceforge.net/projects/c3p0/">here</a>. Also place this jar in
+                    the tomcat lib folder and create a file called c3p0.properties, again in the [tomcat-home]/lib folder and add this in the file.
                 </p>
+
+                <pre>
+c3p0.preferredTestQuery         = SELECT 1
+c3p0.testConnectionOnCheckout   = true
+c3p0.acquireRetryDelay          = 1
+c3p0.acquireRetryAttempts       = 1
+                </pre>
+
+                <h5>MySQL</h5>
+
+                <p>
+                    As you might have noticed by now, the API uses a MySQL database, so make sure you have mysql installed. Verify your installation by being able to
+                    login to the MySQL instance (either via command prompt or your favorite SQL IDE) before proceeding.
+                </p>
+
+                <p>
+                    Next you will have to create the stormcloud database by running the MySQL dump you will find in 
+                    api/core/src/main/database/stormcloud.dump, run it on your MySQL instance to create the database 
+                    and create a user which has write access to (or choose an existing one for that matter).
+                </p>
+
+                <h5>Properties file</h5>
+
+
+                <p>
+                    The API contains some spring configuration which is using a properties file to find the connection specifications 
+                    for the MySQL database we just created in the previous section. You will find a properties file in <br>
+                    api/core/src/main/properties/stormcloud.properties. 
+                </p>
+
+                <p>
+                    Copy this file into the [tomcat-home]/lib/properties folder (create the properties dir). Make sure the url points
+                    to the correct host & database. Also change the username and password to read the user on your MySQL instance that can 
+                    access the stormcloud database.
+                </p>
+
+                <pre>
+stormcloud.db.driver        = com.mysql.jdbc.Driver
+stormcloud.db.url           = jdbc:mysql://localhost:3306/stormcloud
+stormcloud.db.username      = stormcloud
+stormcloud.db.password      = stormcloud
+stormcloud.db.max.poolsize  = 5
+stormcloud.db.min.poolsize  = 1
+                </pre>
+
+
 
                 <h3>User Home (Filesystem)</h3>
 
                 <p>
-                    We are now going to create the User Home where the user 'private parts'  will be living. 
+                    We are now going to create the User Home. 
+                </p>
+                <p>
                     Create the following folder structure in a directory of your choice (i have it in /filesystem/martijn) but you 
                     can really place it anywhere. So create these folders in there:
                 </p>
@@ -253,15 +302,20 @@ into:
                     Once you have the folder structure setup as described you need to change some database values to resemble this:
                 </p>
 
+
+                <p>
+                    This database contains the realm tables for the API Basic authentication and some settings. We are going to change 
+                    a few 'default' values that were inserted when you created the database.
+                </p>
+
                 <p>
                     In the user table change the user_name, password into anything you want to use, this is the user against which 
                     the API calls need to be authenticated. The email address, well, it doesn't do anything yet so, fill in 
                     whatever you want.
+
+                    home_folder, project_folder, m2_folder to the respective filsystem paths where you placed these folders.
                 </p>
 
-                <p>
-                    In the same table change the home_folder, project_folder, m2_folder to the respective filsystem paths where you placed these folders.
-                </p>
 
                 <p>
                     Now... if you brought it this far you are almost set to go BUT...
