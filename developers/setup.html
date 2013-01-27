@@ -32,7 +32,7 @@
 
                 <h3>Developer setup manual</h3>
 
-                <h5>Introduction</h5>
+                <h4>Introduction</h4>
 
                 <p>
                     This is an attempt to guide you (a developer) over the bumps of setting up your environment 
@@ -42,66 +42,138 @@
                 </p>
 
                 <p>
-                    First of start with forking and cloning 
-                    the <a href="https://github.com/stormcloud-ide/project">Project</a>, 
+                    First off start with forking the 
+                    <a href="https://github.com/stormcloud-ide/project">Project</a>, 
                     <a href="https://github.com/stormcloud-ide/gui">GUI</a> and 
-                    <a href="https://github.com/stormcloud-ide/api">API</a>, repositories
+                    <a href="https://github.com/stormcloud-ide/api">API</a> repositories
                     and give them a star of course! ;)
                 </p>
 
+                <h4>At a glance</h4>
+
                 <p>
-                    The project repository contains the super pom, you'll need to build this one first otherwise 
-                    the api project will not build.
+                    Before we start there are a few conceptual things you need to understand. Just to know where what goes.
                 </p>
 
                 <p>
-                    The api project is a maven project, build it, you'll need the stormcloud.war later on. 
+                    The Stormcloud IDE consists of three parts, these are GUI, API and User Home. In the image below the GUI 
+                    domain has the blue-ish/purple overlay, the API is yellow and the User home is green.
+                </p>
+
+                <img src="../images/architecture-colored-domains.png">
+
+                <p>
+                    In theory the GUI, API and User home can all three be placed on different machines but when you develop 
+                    for it they will all three live on one and the same machine, the one you will develop on. 
+                </p>
+                <p>
+                    This does give some-things-todo with respect to tomcat port numbers that will bump into each other, keep that in mind,
+                    it's included in the manual to change the port numbers of the User Home Tomcat instance if you run everything 
+                    on one machine.
+                </p>
+                <p>
+                    Of course you can choose to place it over multiple machines but that will complicate things for development 
+                    and should only be done for deployments aimed at using the IDE, not develop for it. 
+                </p>
+
+                <h4>Short description</h4>
+
+                <p>
+                    The <strong>GUI</strong> is a pure html/javascript project and the idea behind it is to keep it a pure javascript
+                    client which makes http requests to the Stormcloud Rest API on the server. The GUI components are all created with 
+                    the Dojo toolkit, these are called widgets. The stormcloud part is 'bootstrapped' from the js/stormcloud/stormcloud.js
+                    and it has been setup following the <a href="https://github.com/amdjs/amdjs-api/wiki/AMD">AMD</a> mechanism.
                 </p>
 
                 <p>
-                    The gui project is a pure html/javascript project. It's created with the Dojo toolkit and 
-                    the stormcloud implementation bootstraps from the js/stormcloud/stormcloud.js. I have tried to create a 
-                    modular structure which will allow us to continue building modular with reuse etc in mind. 
-                    anyway, check it out, all remarks, ideas, comments etc are welcome as i'm not the almighty all-knower ;)
+                    The <strong>API</strong> project is a maven project serving the Rest API. The glue is Spring and there are a few 
+                    modules glued together: core (containing model pojo's, entites, dao and things like that), Debug, Filesystem, Git,
+                    Java, Maven, Tomcat and Web (the war file). Quite straight forward each module contains the specific parts to realize 
+                    functionality basically matching the module name.
                 </p>
 
                 <p>
-                    The Stormcloud IDE exists of three parts (check the architecture pic way at the 
-                    bottom here http://stormcloud-ide.github.com/project). These are GUI, API and User Home.
+                    The <strong>User Home</strong> is a layout of folders on the filesystem containing all the 'private parts'
+                    (ehm, well, you know what i mean ;)) like project, private JVM/Tomcat instance and some 'internals' folders.
                 </p>
 
-                <h3>GUI</h3>
+                <h4>Set it all up.</h4>
 
                 <p>
-                    The IDE itself is served trough apache, so you need to have an apache installation and a site-enabled 
-                    which serves the contents of the gui repository. The project as cloned is ready to exactly be copy 
-                    pasted into a website root. What i did is create a symlink from the dir where i cloned the sources 
+                    Now. For the work that needs to be done. Take your time to do this, do not rush it as you will definitely end 
+                    up chasing your tail (depending on your experience on the matter) making you pull your hair out and ending up in
+                    the corner of the room with a tinfoil cap on your head thinking you are a banana. Not good (for most of us).
+                </p>
+
+                <p>
+                    Let's get to it then.
+                </p>
+
+                <h4>Building the Super POM</h4>
+
+                <p>
+                    We will start with the Project repository. This repository contains the super pom, you will need to build this one 
+                    first otherwise the API project will not build.
+                </p>
+
+                <p>
+                    So Fork the <a href="https://github.com/stormcloud-ide/project">stormcloud/project</a> repository, clone the Fork 
+                    to your local machine and run <code>mvn clean install</code> on it.
+                    (i'm always including 'clean',. that's just me, you don't have to do that). This should set you up with the project super 
+                    pom in your maven repository.
+                </p>
+
+
+
+                <h4>Setting up the GUI</h4>
+
+                <p>
+                    Fork the <a href="https://github.com/stormcloud-ide/gui">stormcloud/gui</a> repository and clone the Fork to your 
+                    local machine.
+                </p>
+                <p>
+
+                    The Stormcloud IDE GUI is served trough apache, so you need to have an apache installation and a site-enabled 
+                    which serves the contents of the gui repository you just cloned. The project as cloned is ready to exactly be copy 
+                    pasted into a website root. What i do is create a symlink from the dir where i cloned the repository 
                     to the dir apache knows has to serve. That way you can edit/view and commit directly without hassle/moving 
                     things around, of course you can set it up anyway works best for you.
                 </p>
 
                 <p>
-                    Make sure you have mod_proxy_http loaded as well (this will probably change to the ajp connector for 
-                    load balancing later on but is not important now).
+                    Make sure you have mod_proxy_http loaded as well (this will probably change to the ajp connector for reasons not
+                    discussed here as it's beyond the scope of this document).
                 </p>
 
                 <p>
-                    When that is done the GUI should be correctly served from http://your-machine/
+                    When that is done the GUI should be correctly served from http://your-machine/<br>
                     I have placed it in the apache root, you can also use a different folder if you have other sites running 
                     locally (for example http://localhost/[your-site-folder]/), that's all up to you, how you like to work.
                 </p>
 
-                <h3>API (Rest Service)</h3>
+                <p>
+                    At this point you should be able to see the GUI as shown below when accessing <a href="http://localhost">http://localhost</a> 
+                    or whatever folder you placed the site in.
+                </p>
+                <img src="../images/empty-ide.png">
 
                 <p>
-                    Now you only have the gui, this is going to look empty when you run it because it cannot connect to the 
-                    API yet. So that's the second part. The Rest api is served from a tomcat instance, not the same one 
-                    as the user home (next section) is going to use! 
+                    This is without projects, files, services in the left side explorer panes as the GUI cannot reach the Rest API (yet). 
+                    The GUI components should all work though (menus, tabs..), meaning Dojo is correctly loaded.
+                </p>
+
+                <h4>The API (Rest Service)</h4>
+
+                <p>
+                    Now for the next part. The Rest API is served from tomcat. (not the same one as the User Home is going to use!)
                 </p>
 
                 <p>
-                    So install tomcat (i use tomcat 7).
+                    Make sure you have a correctly installed and working Tomcat (i use tomcat 7) which you can reach trough 
+                    <a href="http://localhost:8080">http://localhost:8080</a> where the Tomcat welcome page should show up.
                 </p>
+
+                <img src="../images/tomcat-welcome.png">
 
                 <p>
                     The API spring configuration is using a properties file to find the MySQL database it needs to use 
@@ -121,7 +193,7 @@
                 <h3>User Home (Filesystem)</h3>
 
                 <p>
-                    We are now going to create the User Home where the user 'private parts' (ehm, well, you know what i mean ;) ) will be living. 
+                    We are now going to create the User Home where the user 'private parts'  will be living. 
                     Create the following folder structure in a directory of your choice (i have it in /filesystem/martijn) but you 
                     can really place it anywhere. So create these folders in there:
                 </p>
