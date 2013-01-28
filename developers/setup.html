@@ -370,8 +370,33 @@ ProxyPassReverse /cometd http://localhost:8080/cometd-demo-2.5.0/cometd
                     has to be an 'own' cometd implementation.
                 </p>
 
+                <h5>CORS Work-around</h5>
                 <p>
-                    Almost there, the gui needs to know a few things, this is mainly because it's a work in progress, anyway, here goes:
+                    As i did not find a way to add cross-origin policy headers to the tomcat manager response and do not want to use the
+                    insecure JSONP, the IDE cannot make Ajax calls into the Tomcat manager app for administration tasks (stop/start, deploy/undeploy apps).
+                </p>
+                <p>
+                    Therefore i added the extra proxy rule in apache for now, just to make it work. 
+                </p>
+                <pre>
+# Stormcloud private tomcat
+ProxyPass /manager http://localhost:8180/manager
+ProxyPassReverse /manager http://localhost:8180/manager
+                </pre>
+
+                <p>
+                    It destroys the concept of running the GUI, API 
+                    and User Home on different machines but Stormcloud IDE is still very much in development phase so no harm for now.
+                </p>
+
+                <p>
+                    I'm examining if we can use <a href="http://software.dzhuvinov.com/cors-filter-installation.html">this</a> CORS filter 
+                    (did not get it to work for the manager app), use a 'home grown' one or switch to JMX. For now the proxy rule will make it
+                    work in your development setup.
+                </p>
+
+                <p>
+                    Sow... Almost there, the gui needs to know a few things, this is mainly because it's a work in progress, anyway, here goes:
                 </p>
 
                 <p>
