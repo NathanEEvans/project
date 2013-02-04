@@ -49,6 +49,56 @@
                     and give them a star of course! ;)
                 </p>
 
+
+                <h4>Reported Supported</h4>
+
+                <p>
+                    The following table shows on which OS the manual brought success. If you have any OS not listed here and were successful installing without
+                    diverging from the manual, let me know by posting it to the support <a href="http://stormcloud-ide-mailinglist.44872.n6.nabble.com/Support-f13.html">mailing list</a>, 
+                    i will put it on the 'Reported Supported' list. If you got it done with some adjustments, let me know as well trough the same <a href="http://stormcloud-ide-mailinglist.44872.n6.nabble.com/Support-f13.html">mailing list</a>, i will adjust 
+                    the manual with OS specific directions.
+                </p>
+
+                <table>
+                    <tr>
+                        <th>Operating System</th>
+                        <th>Distribution</th>
+                        <th>Architecture</th>
+
+                    </tr>
+                    <tr>
+                        <td>Linux</td>
+                        <td>Ubuntu 12.10 Server</td>
+                        <td>AMD 64-bit</td>
+                    </tr>
+                    <tr>
+                        <td>Unix</td>
+                        <td>OS X 10.6.8 (Snow Leopard)</td>
+                        <td>AMD 64-bit</td>
+                    </tr>
+                </table>
+
+
+                <h4>Required Software</h4>
+
+
+                <p>
+                    Following is a list of software you will need to install (or already have available) during the setup.
+                </p>
+
+                <ul>
+                    <li><a href="http://git-scm.com/downloads">Git Version Control</a></li>
+                    <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Java Development Kit (JDK 6+)</a></li>
+                    <li><a href="http://maven.apache.org/download.cgi">Maven</a></li>
+                    <li><a href="http://httpd.apache.org/">Apache Web Server</a></li>
+                    <li><a href="http://tomcat.apache.org/download-70.cgi">Tomcat Servlet Container (Tomcat 7+)</a></li>
+                    <li><a href="http://dev.mysql.com/downloads/">MySQL Database</a></li>
+                </ul>
+
+                <p>
+                    And of course your favorite IDE until Stormcloud IDE will be favorite ;)
+                </p>
+
                 <h4>At a glance</h4>
 
                 <p>
@@ -129,6 +179,9 @@
                     Fork the <a href="https://github.com/stormcloud-ide/gui">stormcloud/gui</a> repository and clone the Fork to your 
                     local machine.
                 </p>
+
+                <h5>Install Apache</h5>
+
                 <p>
 
                     The Stormcloud IDE GUI is served trough apache, so you need to have an apache installation and a site-enabled 
@@ -139,19 +192,11 @@
                 </p>
 
                 <p>
-                    Make sure you have mod_proxy_http loaded as well (this will probably change to the ajp connector for reasons not
-                    discussed here as it's beyond the scope of this document).
+                    Make sure you have mod_proxy_http loaded as well.
                 </p>
 
                 <p>
-                    When that is done the GUI should be correctly served from http://your-machine/<br>
-                    I have placed it in the apache doc root, you can also use a different folder if you have other sites running 
-                    locally (for example http://localhost/[your-site-folder]/), that's all up to you, how you like to work.
-                </p>
-
-                <p>
-                    At this point you should be able to see the GUI as shown below when accessing <a href="http://localhost">http://localhost</a> 
-                    or whatever folder you placed the site in.
+                    At this point you should be able to see the GUI as shown below when accessing <a href="http://localhost">http://localhost</a>.
                 </p>
 
                 <p>
@@ -170,7 +215,7 @@
                 </p>
 
 
-                <h5>Tomcat</h5>
+                <h5>Install Tomcat</h5>
 
                 <p>
                     Make sure you have a correctly installed and working Tomcat (i use tomcat 7) which you can reach trough 
@@ -198,7 +243,7 @@ c3p0.acquireRetryDelay          = 1
 c3p0.acquireRetryAttempts       = 1
                 </pre>
 
-                <h5>MySQL</h5>
+                <h5>Install MySQL</h5>
 
                 <p>
                     As you might have noticed by now, the API uses a MySQL database, so make sure you have mysql installed. Verify your installation by being able to
@@ -244,8 +289,7 @@ stormcloud.db.min.poolsize  = 1
                 </p>
 
                 <p>
-                    Create the following folder structure in a directory of your choice (i have it in /filesystem/martijn) but you 
-                    can really place it anywhere. So create these folders in there:
+                    Create the following folder structure in /home/stormcloud (create this folder)
                 </p>
 
                 <pre>
@@ -302,10 +346,6 @@ into:
                 </pre>
 
                 <p>
-                    You can change this to any port you see fit as long as you remember what it is.
-                </p>
-
-                <p>
                     The java folder stays empty for now, i'm still working on a few issues before the private VM can be run, 
                     so all is going to run on one JVM for now.
                 </p>
@@ -319,29 +359,12 @@ into:
                 </p>
 
                 <p>
-                    Check if the deployment is without errors in the tomcat logfile ([tomcat-home/logs/catalina.out])
+                    Check if the deployment is without errors in the tomcat logfile ([tomcat-home]/logs/catalina.out)
                 </p>
 
-                <p>
-                    A few settings in the database need to be edited to resemble your setup and change the API user credentials.    
-                </p>
 
                 <p>
-                    In the user table change the user_name, password into anything you want to use, this is the user against which 
-                    the API calls need to be authenticated. The email address, well, it does not do anything yet so, fill in 
-                    whatever you want.
-                </p>
-                <p>
-                    The same table holds the home_folder, project_folder, m2_folder and you will have to change them to the respective 
-                    filesystem paths where you placed these User Home folders.
-                </p>
-
-                <p>
-                    Now... if you brought it this far you are almost set to go BUT...
-                </p>
-
-                <p>
-                    We need to tie things together between Apache and Tomcat and configure some things in the gui. 
+                    We need to tie things together between Apache and Tomcat. 
                     In your apache configuration add these proxy rules:
                 </p>
 
@@ -396,56 +419,17 @@ ProxyPassReverse /manager http://localhost:8180/manager
                 </p>
 
                 <p>
-                    Sow... Almost there, the gui needs to know a few things, this is mainly because it's a work in progress, anyway, here goes:
-                </p>
-
-                <p>
-                    In the gui/js/stormcloud/_base/context.js you will have to change the values as shown below into values that comply with 
-                    how you have your setup.
-                    I have added 127.0.0.1  stormcloud-ide.com in my /etc/hosts file. You can also just use localhost, whichever you prefer 
-                    as long as these values are according to what you type in the browser to reach the GUI (this is a cross-domain/origin thing).
-                </p>
-
-                <p>
-                    I also have added 127.0.0.1 martijn.stormcloud-ide.com to the hosts file and pointed it in the context file to my 'private' 
-                    tomcat installation in the user home.
-                </p>
-
-                <pre>
-host                : 'stormcloud-ide.com',
-tomcatViewUrl       : 'martijn.stormcloud-ide.com:8180',
-tomcatManagerUrl    : 'martijn.stormcloud-ide.com/manager/text/',
-                </pre>
-
-                <p>
-                    Also change the value in the gui/js/stormcloud/_base/auth.js to read the user/pass you have in the database user table.
-                    mine reads:
-                </p>
-
-                <pre>
-return base64.encode('martijn:1');
-                </pre>
-
-                <p>
-                    that's what i have in the database user_name : martijn, password : 1
-                </p>
-
-                <p>
-                    If all is well (i'm not sure if i missed anything, but probably did) you can now start the tomcat instance with the 
+                    If all is well you can now start the tomcat instance with the 
                     API and cometd in it (the one behind port 8080) and when you serve the GUI now it should show the contents of your
                     User Home Tomcat installation under the services Tab.
                 </p>
 
                 <p>
-                    Try to create a new project and if all is well you will be able to browse it in the projects and files pane. 
+                    Next best stop is here -> <a href="../docs/project/index.html">Create a new Project</a>
                 </p>
 
                 <p>
-                    Pfew, i know it's a bit of bump but it's a one-time setup, once it works you can run and code!
-                </p>
-
-                Place any questions on the <a href="http://stormcloud-ide.44872.n6.nabble.com/">Mailing list</a> so 
-                we can keep it central for anyone to read and know! 
+                    Place any questions on the <a href="http://stormcloud-ide.44872.n6.nabble.com/">Mailing list</a>!
                 </p>
 
             </section>
