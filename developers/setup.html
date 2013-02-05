@@ -81,15 +81,11 @@
 
                 <h4>Required Software</h4>
 
-
                 <p>
                     Following is a list of software you will need to install (or already have available) during the setup.
                 </p>
 
                 <ul>
-                    <li><a href="http://git-scm.com/downloads">Git Version Control</a></li>
-                    <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Java Development Kit (JDK 6+)</a></li>
-                    <li><a href="http://maven.apache.org/download.cgi">Maven</a></li>
                     <li><a href="http://httpd.apache.org/">Apache Web Server</a></li>
                     <li><a href="http://tomcat.apache.org/download-70.cgi">Tomcat Servlet Container (Tomcat 7+)</a></li>
                     <li><a href="http://dev.mysql.com/downloads/">MySQL Database</a></li>
@@ -97,6 +93,50 @@
 
                 <p>
                     And of course your favorite IDE until Stormcloud IDE will be favorite ;)
+                </p>
+
+
+                <h4>Assumptions & Prerequisites</h4>
+
+                <p>
+                    There are things that need to be done where you need to have Administrative privileges on the machine you are installing the IDE.
+                </p>
+
+                <p>
+                    We assume you being a developer know your way around with the JDK, Git and Maven. These parts are not included in the manual
+                    so make sure you have java, git and maven commands available on the command line (This means not embedded in your IDE!).
+                </p>
+
+                <p>
+                    Make sure these commands return something similar as below (it's not som much about the version as it is about having the binaries on your PATH):
+
+
+                <h5>Git</h5>
+                <pre>
+stormcloud:home martijn$ git --version
+git version 1.7.3.4
+                </pre>
+
+
+                <h5>Java</h5>
+                <pre>
+stormcloud:home martijn$ java -version
+java version "1.6.0_39"
+Java(TM) SE Runtime Environment (build 1.6.0_39-b04-442-10M4008)
+Java HotSpot(TM) 64-Bit Server VM (build 20.14-b01-442, mixed mode)
+                </pre>
+
+                <h5>Maven</h5>
+                <pre>
+stormcloud:home martijn$ mvn --version
+Apache Maven 3.0.4 (r1232337; 2012-01-17 04:44:56-0400)
+Maven home: /usr/share/maven
+Java version: 1.6.0_39, vendor: Apple Inc.
+Java home: /System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home
+Default locale: en_US, platform encoding: MacRoman
+OS name: "mac os x", version: "10.6.8", arch: "x86_64", family: "mac"
+                </pre>
+
                 </p>
 
                 <h4>At a glance</h4>
@@ -192,21 +232,29 @@
                 </p>
 
                 <p>
-                    Make sure you have mod_proxy_http loaded as well.
+                    Make sure you have proxy_http loaded as well. You can enable this by running the command (you need Administrative rights for this):
+                </p>
+
+                <pre>
+$ a2enmod proxy_http
+                </pre>
+
+                <p>
+                    Don't forget to restart apache!
                 </p>
 
                 <p>
-                    At this point you should be able to see the GUI as shown below when accessing <a href="http://localhost">http://localhost</a>.
+                    At this point you should be able to see the GUI Login page as shown below when accessing <a href="http://localhost">http://localhost</a>.
                 </p>
 
                 <p>
-                    <img src="../images/empty-ide.png">
+                    <img src="../images/login_page.png">
                 </p>
 
                 <p>
-                    This is <strong>without</strong> projects, files or services visible in the left side explorer panes as the GUI cannot reach the Rest API (yet). 
-                    The GUI components should all work though (menus, tabs..), meaning Dojo is correctly loaded.
+                    Not much to see yet so let's continue ...
                 </p>
+
 
                 <h4>The API (Rest Service)</h4>
 
@@ -242,6 +290,11 @@ c3p0.testConnectionOnCheckout   = true
 c3p0.acquireRetryDelay          = 1
 c3p0.acquireRetryAttempts       = 1
                 </pre>
+
+
+                <p>
+                    When you made those changes you will have to restart Tomcat so the jars and properties file end up on the classpath.
+                </p>
 
                 <h5>Install MySQL</h5>
 
@@ -353,15 +406,33 @@ into:
 
                 <h4>The last bits</h4>
 
+
+                <h5>Deploy the API</h5>
+
                 <p>
                     Time to build and deploy the Stormcloud API war file. Fork and clone the <a href="https://github.com/stormcloud-ide/api">stormcloud/api</a> repository and run a <code>mvn clean install</code> on the api project
                     and you should end up with a stormcloud.war in the web/target dir. Deploy this into the Tomcat instance running behind port 8080.
                 </p>
 
                 <p>
-                    Check if the deployment is without errors in the tomcat logfile ([tomcat-home]/logs/catalina.out)
+                    Check if the deployment is without errors in the Stormcloud logfile in /var/log/stormcloud/server.log <br>
+                    Last line in there should be similar to this:
                 </p>
 
+                <pre>
+FrameworkServlet 'DispatcherServlet': initialization completed in 6436 ms
+                </pre>
+
+                <h5>Deploy CometD</h5>
+
+                <p>
+                    For now i have added the cometd-demo-2.5.0.war in api/core/src/main/cometd which you can directly deploy 
+                    into tomcat. It's a demo war and basically a left over of the chat proof of concept i made so at some point there 
+                    has to be an 'own' cometd implementation.
+                </p>
+
+
+                <h5>Apache Proxy Rules</h5>
 
                 <p>
                     We need to tie things together between Apache and Tomcat. 
@@ -384,13 +455,14 @@ ProxyPassReverse /stormcloud http://localhost:8080/stormcloud
 # Stormcloud Chat (Comet)
 ProxyPass /cometd http://localhost:8080/cometd-demo-2.5.0/cometd
 ProxyPassReverse /cometd http://localhost:8080/cometd-demo-2.5.0/cometd
+
+# Stormcloud private tomcat
+ProxyPass /manager http://localhost:8180/manager
+ProxyPassReverse /manager http://localhost:8180/manager
                 </pre>
 
                 <p>
-                    And now i see the second rule for cometd, yes that one needs to be deployed in tomcat as well... 
-                    for now i have added the cometd-demo-2.5.0.war in api/core/src/main/cometd which you can directly deploy 
-                    into tomcat. It's a demo war and basically a left over of the chat proof of concept i made so at some point there 
-                    has to be an 'own' cometd implementation.
+                    Restart Tomcat!
                 </p>
 
                 <h5>CORS Work-around</h5>
@@ -399,13 +471,8 @@ ProxyPassReverse /cometd http://localhost:8080/cometd-demo-2.5.0/cometd
                     insecure JSONP, the IDE cannot make Ajax calls into the Tomcat manager app for administration tasks (stop/start, deploy/undeploy apps).
                 </p>
                 <p>
-                    Therefore i added the extra proxy rule in apache for now, just to make it work. 
+                    Therefore i added the last proxy rule in apache for you just added in the configuration, just to make it work. 
                 </p>
-                <pre>
-# Stormcloud private tomcat
-ProxyPass /manager http://localhost:8180/manager
-ProxyPassReverse /manager http://localhost:8180/manager
-                </pre>
 
                 <p>
                     It destroys the concept of running the GUI, API 
@@ -419,9 +486,8 @@ ProxyPassReverse /manager http://localhost:8180/manager
                 </p>
 
                 <p>
-                    If all is well you can now start the tomcat instance with the 
-                    API and cometd in it (the one behind port 8080) and when you serve the GUI now it should show the contents of your
-                    User Home Tomcat installation under the services Tab.
+                    At this point you should be able to run the IDE and on a first startup it will show "No Projects Available" in the Project explorer. 
+                    That means it's running as it should and it's time for you to create the first project.
                 </p>
 
                 <p>
