@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="chrome=1">
         <title>Stormcloud IDE</title>
+        <script type="text/javascript" src="../../javascripts/swfobject.js"></script>
         <link rel="stylesheet" href="../../stylesheets/styles.css">
         <link rel="stylesheet" href="../../stylesheets/pygment_trac.css">
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
@@ -28,12 +29,17 @@
                 </ul>
 
             </header>
+
             <section>
 
                 <h3>Screen Casts</h3>
 
                 <p>
-                    <a href="../../video/test.swf">Test</a>
+
+                    <script type="text/javascript">
+                        swfobject.embedSWF("test.swf", "myContent", "300", "120", "9.0.0");
+                    </script>
+
                 </p>
 
             </section>
